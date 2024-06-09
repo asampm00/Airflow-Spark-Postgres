@@ -24,10 +24,8 @@ class InsightJob:
         self.spark_session = spark_session
         self.helper_utils = helper_utils
         self.df = None
-        self.df_god_name_EN = None
-        self.df_country = None
-        self.df_email = None
-        self.df_user_count = None
+        self.df_pantheon_EN = None
+        self.df_role_EN = None
 
     def run(self) -> None:
         """
@@ -42,37 +40,21 @@ class InsightJob:
                 .option("password", self.config["postgres_pwd"])\
                 .load()
             print(self.df.show(5))
-        """
-        def get_total_user() -> None:
-            df_user_count = self.df.select(countDistinct("id"))
-            pdf_user_count = df_user_count.toPandas()
-            self.df_user_count = pdf_user_count['count(DISTINCT id)'][0]
 
-        def get_country_stat() -> None:
-            df_country = self.df.groupBy("country").count().withColumnRenamed("count", "freq").orderBy('freq',
-                                                                                                       ascending=False)
-            pdf_country = df_country.toPandas()
-            self.df_country = pd.concat([pdf_country.head(1), pdf_country.tail(1)])
+        def get_role_EN() -> None:
+            self.df_role_EN = self.df.select("role_EN").toPandas()
 
-        def get_email_stat() -> None:
-            df_email = self.df.withColumn("email_domain", regexp_extract("email", "(?<=@)[^.]+(?=\\.)", 0)).groupby(
-                'email_domain').count().sort(
-                'count', ascending=False)
-            pdf_email = df_email.toPandas()
-            self.df_email = pd.concat([pdf_email.head(1), pdf_email.tail(1)])
-
-        get_total_user()
-        get_country_stat()
-        get_email_stat()
-
-        """
-        def get_god_names_EN() -> None:
-            self.df_god_name_EN = self.df.select("god_name_EN").toPandas()
+        def get_pantheon_EN() -> None:
+            self.df_pantheon_EN = self.df.select("pantheon_EN").toPandas()            
 
         to_retrieve_data()
-        get_god_names_EN()
 
-        self.helper_utils.get_report(self.df_god_name_EN, self.report_path)
+        get_role_EN()
+        get_pantheon_EN()
+
+        self.helper_utils.get_report(self.df_pantheon_EN, 'pantheon_EN.csv')
+        self.helper_utils.get_report(self.df_role_EN, 'role_EN.csv')
+
 
 class HelperUtils:
     """
@@ -94,5 +76,5 @@ class HelperUtils:
 
     @staticmethod
     def get_report(df_country : pd.DataFrame, report_path : str) -> None:
-        df_country.to_csv('/usr/local/airflow/output/df_country.csv', index=False)
+        df_country.to_csv('/usr/local/airflow/output/'+report_path, index=False)
 
