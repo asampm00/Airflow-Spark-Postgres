@@ -34,10 +34,7 @@ with open(config_file, 'r') as f:
 
 
 def download_data(*op_args):
-    http = urllib3.PoolManager()
-    r = http.request('GET', op_args[0])
-    with open('../spark/resources/data/mock_data.json', 'wb') as outf:
-        outf.write(r.data)
+    print("Downloading data from")
 
 
 ###############################################
@@ -68,7 +65,7 @@ start = DummyOperator(task_id="start", dag=dag)
 # simple python operator to download the data
 get_data = PythonOperator(
     task_id='get_data',
-    python_callable=download_data, op_args=[config['url']],
+    python_callable=download_data,
     dag=dag)
 
 # create a temp table to persist the data from spark

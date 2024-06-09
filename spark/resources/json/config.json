@@ -7,7 +7,6 @@
   "postgres_table": "public.oetker",
   "spark_master": "local[*]",
   "postgres_driver_jar" : "/usr/local/spark/resources/jars/postgresql-9.4.1207.jar",
-  "config_file" : "/usr/local/spark/resources/json/config.json",
-  "url" : "https://storage.googleapis.com/datascience-public/data-eng-challenge/MOCK_DATA.json"
+  "config_file" : "/usr/local/spark/resources/json/config.json"
 }
 

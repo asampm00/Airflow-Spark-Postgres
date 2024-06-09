@@ -23,7 +23,6 @@ class InsightJob:
         self.report_path = config['report_path']
         self.spark_session = spark_session
         self.helper_utils = helper_utils
-        self.logger = InsightJob.__logger(spark_session)
         self.df = None
         self.df_country = None
         self.df_email = None
@@ -33,8 +32,6 @@ class InsightJob:
         """
         Main transform class to run all jobs and save the data into absolute sink location
         """
-        self.logger.info('Running actions Job')
-
         def to_retrieve_data() -> None:
             self.df = self.spark_session.read \
                 .format("jdbc") \
@@ -70,19 +67,6 @@ class InsightJob:
         # generate a html report
         self.helper_utils.get_report(self.df_country, self.df_email, self.df_user_count, self.report_path)
 
-        self.logger.info('End running actions')
-
-    @staticmethod
-    def __logger(spark_session):
-        """
-        Logger method to get the logging
-        :param spark_session: Spark Session
-        :return: Logmanager instance
-        """
-        log4j_logger = spark_session.sparkContext._jvm.org.apache.log4j  # pylint: disable=W0212
-        return log4j_logger.LogManager.getLogger(__name__)
-
-
 class HelperUtils:
     """
     A helper utils class to support the necessary action trigger by pyspark and generate the report
@@ -106,31 +90,7 @@ class HelperUtils:
         """
         A report function to generate report using jinja and html
         """
-        styler = df_country.style.applymap(color_negative_red)
-        # Template handling
-        styler2 = df_email.style.applymap(color_negative_red)
+        print(df_country)
+        # df_country.to_csv(report_path + 'df_country.csv', index=False)
+        # df_email.to_csv(report_path + 'df_email.csv', index=False)
 
-        env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=report_path))
-        template = env.get_template('template.html')
-        get_email_plot(df_email, report_path)
-        get_country_plot(df_country, report_path)
-        html = template.render(my_table=styler.render(), my_table1=styler2.render(), user_count=user_count)
-        with open(os.path.join(report_path + 'report.html'), 'w') as f:
-            f.write(html)
-
-
-def get_email_plot(df_email : pd.DataFrame, report_path : str) -> None:
-    ax = sns.barplot(x='email_domain', y='count', data=df_email)
-    fig = ax.get_figure()
-    fig.savefig(os.path.join(report_path + 'plot_email.svg'))
-
-
-def get_country_plot(df_country : pd.DataFrame, report_path : str) -> None:
-    ax = sns.barplot(x='country', y='freq', data=df_country)
-    fig = ax.get_figure()
-    fig.savefig(os.path.join(report_path + 'plot_country.svg'))
-
-
-def color_negative_red(val) -> None:
-    color = 'red'
-    return f'color: {color}'
