@@ -19,7 +19,6 @@ def run() -> None:
                      )
 
     helpers_utils = ej.HelperUtils()
-    print(sys.argv[1])
     config = helpers_utils.config_loader(sys.argv[1])
     ej.ExtractJob(spark_session, ej.HelperUtils, config).run()
 

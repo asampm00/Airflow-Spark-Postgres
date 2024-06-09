@@ -26,7 +26,13 @@ services:
         environment:
             - LOAD_EX=n
             - EXECUTOR=Local
+        command: >
+          bash -c "
+            chown -R airflow: /usr/local/airflow/output &&
+            /entrypoint.sh webserver
+          "            
         volumes:
+            - ../output:/usr/local/airflow/output #Output folder
             - ../dags:/usr/local/airflow/dags #DAG folder
             - ../spark/src:/usr/local/spark/src/app #Spark Scripts (Must be the same path in airflow and Spark Cluster)
             - ../spark/resources:/usr/local/spark/resources #Resources folder (Must be the same path in airflow and Spark Cluster)

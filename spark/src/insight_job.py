@@ -24,6 +24,7 @@ class InsightJob:
         self.spark_session = spark_session
         self.helper_utils = helper_utils
         self.df = None
+        self.df_god_name_EN = None
         self.df_country = None
         self.df_email = None
         self.df_user_count = None
@@ -40,7 +41,8 @@ class InsightJob:
                 .option("user", self.config['postgres_user'])\
                 .option("password", self.config["postgres_pwd"])\
                 .load()
-
+            print(self.df.show(5))
+        """
         def get_total_user() -> None:
             df_user_count = self.df.select(countDistinct("id"))
             pdf_user_count = df_user_count.toPandas()
@@ -59,13 +61,18 @@ class InsightJob:
             pdf_email = df_email.toPandas()
             self.df_email = pd.concat([pdf_email.head(1), pdf_email.tail(1)])
 
-        to_retrieve_data()
         get_total_user()
         get_country_stat()
         get_email_stat()
 
-        # generate a html report
-        self.helper_utils.get_report(self.df_country, self.df_email, self.df_user_count, self.report_path)
+        """
+        def get_god_names_EN() -> None:
+            self.df_god_name_EN = self.df.select("god_name_EN").toPandas()
+
+        to_retrieve_data()
+        get_god_names_EN()
+
+        self.helper_utils.get_report(self.df_god_name_EN, self.report_path)
 
 class HelperUtils:
     """
@@ -86,11 +93,6 @@ class HelperUtils:
         return config
 
     @staticmethod
-    def get_report(df_country : pd.DataFrame, df_email : pd.DataFrame, user_count : int, report_path : str) -> None:
-        """
-        A report function to generate report using jinja and html
-        """
-        print(df_country)
-        # df_country.to_csv(report_path + 'df_country.csv', index=False)
-        # df_email.to_csv(report_path + 'df_email.csv', index=False)
+    def get_report(df_country : pd.DataFrame, report_path : str) -> None:
+        df_country.to_csv('/usr/local/airflow/output/df_country.csv', index=False)
 

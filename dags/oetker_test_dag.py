@@ -10,11 +10,13 @@ This pipeline will transform the data little bit using some aggregation by pulli
 """
 
 import json
+import requests
+import urllib3
+
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
 from datetime import datetime, timedelta
-import urllib3
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 
@@ -25,6 +27,8 @@ from airflow.operators.postgres_operator import PostgresOperator
 # spark_master = "spark://spark:7077"
 config_file = "/usr/local/spark/resources/json/config.json"
 
+url = "https://cms.smitegame.com/wp-json/smite-api/all-gods/3"
+
 ###############################################
 # config loader and callback func
 ###############################################
@@ -34,7 +38,11 @@ with open(config_file, 'r') as f:
 
 
 def download_data(*op_args):
-    print("Downloading data from")
+    response = requests.request("GET", url)
+    data = response.json()
+    with open('/usr/local/airflow/output/api_output.json', 'w') as f:
+        json.dump(data, f)
+    print(response.text)
 
 
 ###############################################

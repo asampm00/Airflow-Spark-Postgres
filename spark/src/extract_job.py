@@ -29,7 +29,6 @@ class ExtractJob:
         self.source_path = config['input_path']
         self.spark_session = spark_session
         self.helper_utils = helper_utils
-        self.logger = ExtractJob.__logger(spark_session)
         self.df = None
         self.df_valid = None
 
@@ -37,52 +36,14 @@ class ExtractJob:
         """
         Main transform class to run all jobs and save the data into jdbc sink (postgres)
         """
-        self.logger.info('Running Transformation Job')
-
         def read_data() -> None:
-            json_schema = StructType(
-                [
-                    StructField('country', StringType()),
-                    StructField('date', StringType()),
-                    StructField('email', StringType()),
-                    StructField('first_name', StringType()),
-                    StructField('gender', StringType()),
-                    StructField('id', StringType()),
-                    StructField('ip_address', StringType()),
-                    StructField('last_name', StringType())
-                ]
-            )
             # read the input file
-            self.df = self.spark_session.read.json(self.source_path, schema=json_schema, multiLine=True)
-
-        def capitilize_name() -> None:
-            """
-            Capitilize the first letter of the country coulmn.
-            """
-            self.logger.info('Running capitilize Job')
-            self.df = self.df.withColumn("country", initcap(col('country')))
-
-        def validate_ip() -> None:
-            """
-            Validate the ip column
-            """
-            self.logger.info('Running Validation Job')
-            ip_valid_udf = udf(self.helper_utils.validIPAddress)
-            self.df = self.df.withColumn('ip_validity', ip_valid_udf('ip_address'))
-
-        def to_date_format() -> None:
-            """
-            Taking a fixed format for the date column
-            """
-            self.logger.info('Running DATE Job')
-            self.df = self.df.withColumn('date', to_date('date', 'dd/mm/yyyy'))
-            self.df.show()
+            self.df = self.spark_session.read.json(self.source_path)
 
         def to_persist_data() -> None:
             """
             Data persist to use for later into postgres
             """
-            self.logger.info('Running persistent Job')
             (self.df.write
              .format("jdbc")
              .option("url", self.config['postgres_db'])
@@ -93,23 +54,7 @@ class ExtractJob:
              .save())
 
         read_data()
-        capitilize_name()
-        validate_ip()
-        to_date_format()
         to_persist_data()
-
-        self.logger.info('End running TransformationJob')
-
-    @staticmethod
-    def __logger(spark_session):
-        """
-        Logger method to get the logging
-        :param spark_session: Spark Session
-        :return: Logmanager instance
-        """
-        log4j_logger = spark_session.sparkContext._jvm.org.apache.log4j  # pylint: disable=W0212
-        return log4j_logger.LogManager.getLogger(__name__)
-
 
 class HelperUtils:
     """
