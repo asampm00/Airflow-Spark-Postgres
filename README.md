@@ -59,11 +59,6 @@ There is only one dag inside the dag folder. You just have to trigger the dag to
 
 After running the dag succesfully, there will be a report generated in the spark/resources/report folder.
 
-![](/doc/report.png)
-
-This is a simple report generated with some insight from the data.
-
-
 # Airflow Spark
 
 
@@ -138,18 +133,6 @@ spark-worker-n:
 
 ```
 
-## Adding Airflow Extra packages
-
-Rebuild Dockerfile (in this example, adding GCP extra):
-
-    $ docker build --rm --build-arg AIRFLOW_DEPS="gcp" -t docker-airflow-spark:1.10.7_3.1.2 .
-
-After successfully built, run docker-compose to start container:
-
-    $ docker-compose up
-
-More info at: https://github.com/puckel/docker-airflow#build
-
 ## Useful docker commands
 
     List Images:
@@ -174,23 +157,3 @@ More info at: https://github.com/puckel/docker-airflow#build
 
     Stop Containers:
     $ docker-compose -f <compose-file.yml> down --remove-orphans
-    
-# Extras
-## Run spark app speartely from conda env or local virtual env:
-If you want to test the app separtely that is also possible, just make sure the docker postgres server is running as it needs this service.
-also make sure, you export python path properly otherwise you will get ModuleNotFound Error.
-
-This way you can export python path:
-
-    $ export PYTHONPATH="${PYTHONPATH}:${PWD}"
-
-## The report
-I have made the report extra to just show that the program works and finds some insight.
-
-# Unit and Integration Test :
-Testing pyspark application is complicated and it may take some time. I have not done it here but i have
-done just one unit test. Integration test needs the spark shared instances to test few units as a integration test.
-
-Here is a screenshot of my one unit test:
-
-![](/doc/test-unit.png "Unit test of helper function ip valid")
