@@ -8,7 +8,7 @@ Step to run the whole program is simple :
 
 ### Clone project
 
-    $ git clone https://github.com/mk-hasan/oetker-ts.git
+    $ git clone https://github.com/asampm00/Airflow-Spark-Postgres.git
 
 ### Start containers from docker folder
 
@@ -149,6 +149,10 @@ spark-worker-n:
 
     Access container bash:
     $ docker exec -i -t <container_name> /bin/bash
+    $ docker exec -it -u 0 <container-id> /bin/bash
+    
+    Give permision
+    $ chown -R airflow: /usr/local/airflow/output/
 
 ## Useful docker-compose commands
 

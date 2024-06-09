@@ -25,12 +25,7 @@ services:
             - postgres
         environment:
             - LOAD_EX=n
-            - EXECUTOR=Local
-        command: >
-          bash -c "
-            chown -R airflow: /usr/local/airflow/output &&
-            /entrypoint.sh webserver
-          "            
+            - EXECUTOR=Local       
         volumes:
             - ../output:/usr/local/airflow/output #Output folder
             - ../dags:/usr/local/airflow/dags #DAG folder
@@ -100,6 +95,24 @@ services:
         volumes:
             - ../spark/src:/usr/local/spark/src/app # Spark scripts folder (Must be the same path in airflow and Spark Cluster)
             - ../spark/resources:/usr/local/spark/resources #Resources folder (Must be the same path in airflow and Spark Cluster)
+
+    spark-worker-3:
+        image: mkhasan0007/bitnami-spark:3.1.2
+        user: root
+        networks:
+            - default_net
+        environment:
+            - SPARK_MODE=worker
+            - SPARK_MASTER_URL=spark://spark:7077
+            - SPARK_WORKER_MEMORY=1G
+            - SPARK_WORKER_CORES=1
+            - SPARK_RPC_AUTHENTICATION_ENABLED=no
+            - SPARK_RPC_ENCRYPTION_ENABLED=no
+            - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+            - SPARK_SSL_ENABLED=no
+        volumes:
+            - ../spark/src:/usr/local/spark/src/app # Spark scripts folder (Must be the same path in airflow and Spark Cluster)
+            - ../spark/resources:/usr/local/spark/resources #Resources folder (Must be the same path in airflow and Spark Cluster)            
 
 networks:
     default_net:
